@@ -1,0 +1,868 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Forma las palabras antes de que Jurásica atrape a Emi.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Encuentra a Emi">
+<title>Encuentra a Emi</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="theme-color" content="#0d2431">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Nunito:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+/* Concepto: una sola columna tipo app, escena nocturna con luna y cabaña a la derecha.
+   Emi corre hacia la cabaña, Jurásica lo persigue. Una sola mirada de lujo: la escena. */
+:root{
+  --night:#0d2431; --panel:#143a4d; --panel-2:#1b4a61; --line:#2a617c;
+  --ink:#f4f8f5; --muted:#a6bec6;
+  --sun:#ffc83d; --sun-deep:#d99a00; --sun-ink:#3a2a00;
+  --coral:#ff6b5a; --coral-deep:#c9412f;
+  --mint:#4fd6a0; --mint-deep:#25a577;
+  --sky:#6ccfff;
+  --font-display:'Baloo 2','Trebuchet MS',system-ui,sans-serif;
+  --font-body:'Nunito',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --r:20px;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{min-height:100%}
+body{
+  margin:0; background:var(--night); color:var(--ink);
+  font-family:var(--font-body); font-size:16px; line-height:1.4; font-weight:600;
+  padding-block:14px 28px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));
+  -webkit-tap-highlight-color:transparent;
+  background-image:radial-gradient(circle at 80% -10%,#1d5470 0,transparent 55%),radial-gradient(circle at -10% 110%,#17435a 0,transparent 50%);
+  background-attachment:fixed;
+}
+#app{max-width:480px;margin-inline:auto;display:flex;flex-direction:column;gap:14px;min-width:0}
+h1,h2,h3{font-family:var(--font-display);margin:0;line-height:1.05;text-wrap:balance}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none;touch-action:manipulation}
+:focus-visible{outline:3px solid var(--sky);outline-offset:3px;border-radius:12px}
+
+/* Botones */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  font-family:var(--font-display);font-weight:800;font-size:1.25rem;letter-spacing:.01em;
+  padding:12px 22px;border-radius:16px;min-height:54px;
+  background:var(--sun);color:var(--sun-ink);box-shadow:0 5px 0 var(--sun-deep);
+  transition:transform .08s,box-shadow .08s;
+}
+.btn:active{transform:translateY(4px);box-shadow:0 1px 0 var(--sun-deep)}
+.btn.block{width:100%}
+.btn.ghost{background:var(--panel);color:var(--ink);box-shadow:0 5px 0 #0a1c27;font-size:1.05rem;min-height:48px}
+.btn.ghost:active{box-shadow:0 1px 0 #0a1c27}
+.btn.mint{background:var(--mint);color:#04321f;box-shadow:0 5px 0 var(--mint-deep)}
+.btn.mint:active{box-shadow:0 1px 0 var(--mint-deep)}
+.iconbtn{width:44px;height:44px;border-radius:14px;background:var(--panel);display:grid;place-items:center;font-size:1.2rem;flex:none}
+
+/* Inicio */
+.hero{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;padding-top:6px}
+.logo{font-size:clamp(2.3rem,11vw,3.3rem);font-weight:800;letter-spacing:-.01em}
+.logo em{font-style:normal;color:var(--sun);display:block}
+.tagline{color:var(--muted);margin:0;max-width:30ch}
+.duo{position:relative;aspect-ratio:2/1;width:100%;border-radius:var(--r);overflow:hidden;background:var(--panel)}
+.duo .scene-bg{position:absolute;inset:0;width:100%;height:100%}
+.modes{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.mode{
+  position:relative;text-align:left;padding:14px;border-radius:var(--r);background:var(--panel);
+  border:3px solid transparent;display:flex;flex-direction:column;gap:4px;min-width:0;
+}
+.mode[aria-pressed="true"]{border-color:var(--sun);background:var(--panel-2)}
+.mode b{font-family:var(--font-display);font-size:1.3rem;line-height:1}
+.mode span{color:var(--muted);font-size:.9rem;font-weight:700}
+.mode .em{font-size:1.8rem}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.stat{background:var(--panel);border-radius:16px;padding:10px 8px;text-align:center;min-width:0}
+.stat b{display:block;font-family:var(--font-display);font-size:1.5rem;line-height:1.1;font-variant-numeric:tabular-nums}
+.stat span{font-size:.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;font-weight:800}
+.row{display:flex;gap:10px;align-items:center}
+.grow{flex:1;min-width:0}
+
+/* Juego: barra superior */
+.topbar{display:flex;align-items:center;gap:10px}
+.hearts{display:flex;gap:4px;font-size:1.35rem;min-width:84px}
+.hearts i{font-style:normal;transition:transform .2s,opacity .2s}
+.hearts i.off{opacity:.25;filter:grayscale(1);transform:scale(.8)}
+.progress{flex:1;min-width:0;display:flex;flex-direction:column;gap:5px}
+#mode-txt{display:none}
+.progress small{white-space:nowrap;font-size:.78rem;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.08em;display:flex;justify-content:space-between}
+.bar{height:10px;border-radius:99px;background:#0a1c27;overflow:hidden}
+.bar>i{display:block;height:100%;width:0;border-radius:99px;background:var(--sky);transition:width .3s}
+.score{font-family:var(--font-display);font-weight:800;font-size:1.3rem;font-variant-numeric:tabular-nums;min-width:56px;text-align:right}
+
+/* Escena */
+.scene{position:relative;aspect-ratio:2/1;border-radius:var(--r);overflow:hidden;background:#0a2230;isolation:isolate}
+.scene-bg{position:absolute;inset:0;width:100%;height:100%;z-index:-1}
+.actor{position:absolute;bottom:4%;width:19%;left:4%;transition:left .55s cubic-bezier(.3,1.35,.5,1),transform .4s,opacity .4s;pointer-events:none}
+.actor svg{width:100%;height:auto;display:block;overflow:visible}
+.actor.run svg{animation:bob .42s ease-in-out infinite}
+.actor.emi{z-index:3}.actor.jura{z-index:2}
+.actor .face-happy,.actor .face-scared,.actor .face-angry,.actor .face-win{display:none}
+.actor[data-mood="happy"] .face-happy,.actor[data-mood="scared"] .face-scared,
+.actor[data-mood="angry"] .face-angry,.actor[data-mood="win"] .face-win{display:inline}
+.actor.hide{opacity:0;transform:scale(.4)}
+.threat{height:8px;border-radius:99px;background:#0a1c27;overflow:hidden}
+.threat>i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--sun),var(--coral));transition:width .2s linear}
+.speech{
+  position:absolute;z-index:5;top:8%;max-width:46%;padding:6px 10px;border-radius:14px;background:#fff;color:#16303d;
+  font-family:var(--font-display);font-weight:800;font-size:.95rem;line-height:1.1;
+  opacity:0;transform:translateY(6px) scale(.9);transition:opacity .2s,transform .2s;pointer-events:none
+}
+.speech.show{opacity:1;transform:none}
+.speech::after{content:"";position:absolute;bottom:-7px;left:18px;border:8px solid transparent;border-top-color:#fff;border-bottom:0}
+
+/* Pista y palabra */
+.clue{
+  background:var(--panel);border-radius:var(--r);padding:12px 14px;display:flex;align-items:center;gap:14px;min-height:92px;
+}
+.clue .big{font-size:3.2rem;line-height:1;flex:none;filter:drop-shadow(0 4px 0 rgba(0,0,0,.25))}
+.clue .txt{min-width:0}
+.clue .cat{font-size:.75rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--sky)}
+.clue .def{font-family:var(--font-display);font-size:1.25rem;font-weight:600;line-height:1.15;margin-top:2px}
+.slots{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;min-height:54px}
+.slot{
+  width:clamp(32px,9.6vw,46px);height:clamp(42px,12vw,56px);border-radius:12px;background:#0a1c27;border:3px solid #1d4256;
+  display:grid;place-items:center;font-family:var(--font-display);font-weight:800;font-size:clamp(1.3rem,6vw,1.9rem);color:var(--sun);
+}
+.slot.on{background:var(--sun);color:var(--sun-ink);border-color:var(--sun-deep);animation:pop .25s}
+.slot.hint{background:var(--sky);color:#06293a;border-color:#3aa7d8}
+.slot.next{border-color:var(--sun);box-shadow:0 0 0 3px rgba(255,200,61,.2)}
+
+/* Fichas */
+.tiles{display:flex;flex-wrap:wrap;gap:9px;justify-content:center}
+.tile{
+  width:clamp(44px,13vw,56px);height:clamp(48px,14vw,60px);border-radius:15px;background:var(--panel-2);color:var(--ink);
+  font-family:var(--font-display);font-weight:800;font-size:clamp(1.4rem,6.4vw,1.9rem);box-shadow:0 5px 0 #0a1c27;
+  transition:transform .08s,box-shadow .08s,opacity .2s;
+}
+.tile:active{transform:translateY(4px);box-shadow:0 1px 0 #0a1c27}
+.tile.used{opacity:0;pointer-events:none;transform:scale(.6)}
+.tile.bad{animation:shake .35s;background:var(--coral);box-shadow:0 5px 0 var(--coral-deep)}
+.tools{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+
+/* Ventana de resultado */
+.modal{position:fixed;inset:0;z-index:50;display:grid;place-items:center;background:rgba(5,16,24,.78);backdrop-filter:blur(3px);
+  padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.card{width:100%;max-width:400px;max-height:100%;overflow:auto;background:var(--panel);border-radius:26px;padding:20px 18px;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;
+  border:3px solid var(--line);animation:pop .3s}
+.card h2{font-size:2rem}
+.card .word{font-family:var(--font-display);font-weight:800;font-size:2.2rem;color:var(--sun);letter-spacing:.04em;overflow-wrap:anywhere}
+.card .msg{margin:0;color:var(--muted)}
+.card .pic{width:46%;max-width:170px}
+.card .pic svg{width:100%;height:auto;display:block;overflow:visible}
+.stars{font-size:2rem;letter-spacing:.2em;display:flex;gap:6px}
+.stars .off{opacity:.2;filter:grayscale(1)}
+.gain{font-family:var(--font-display);font-weight:800;font-size:1.3rem;color:var(--mint)}
+.summary{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%}
+#confetti{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:60}
+.live{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+.foot{color:var(--muted);font-size:.8rem;text-align:center;margin:0}
+
+@keyframes bob{0%,100%{transform:translateY(0) rotate(-1.5deg)}50%{transform:translateY(-5%) rotate(1.5deg)}}
+@keyframes pop{0%{transform:scale(.7)}70%{transform:scale(1.1)}100%{transform:scale(1)}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-7px)}40%{transform:translateX(7px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
+@keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
+</style>
+</head><body>
+<div id="app">
+
+  <!-- INICIO -->
+  <section id="home" aria-label="Inicio" style="display:flex;flex-direction:column;gap:14px">
+    <div class="hero">
+      <h1 class="logo">Encuentra<em>a Emi</em></h1>
+      <p class="tagline">Forma cada palabra antes de que Jurásica lo atrape.</p>
+    </div>
+    <div class="duo" id="duo" aria-hidden="true"></div>
+
+    <div class="modes" role="group" aria-label="Elige tu modo">
+      <button class="mode" id="mode-kids" type="button" aria-pressed="true">
+        <span class="em" aria-hidden="true">🧒</span><b>Peques</b>
+        <span>Dibujos, sin reloj y hasta 4 errores</span>
+      </button>
+      <button class="mode" id="mode-adults" type="button" aria-pressed="false">
+        <span class="em" aria-hidden="true">🧠</span><b>Mayores</b>
+        <span>Definiciones, letras de más y reloj en contra</span>
+      </button>
+    </div>
+
+    <div class="stats" aria-label="Tus récords">
+      <div class="stat"><b id="st-best">0</b><span>Récord</span></div>
+      <div class="stat"><b id="st-stars">0</b><span>Estrellas</span></div>
+      <div class="stat"><b id="st-streak">0</b><span>Días seguidos</span></div>
+    </div>
+
+    <button class="btn block" id="play" type="button">¡Jugar!</button>
+    <div class="row">
+      <button class="btn ghost grow" id="tg-sound" type="button" aria-pressed="true">🔊 Sonido</button>
+      <button class="btn ghost grow" id="tg-voice" type="button" aria-pressed="true">🗣️ Voz</button>
+    </div>
+    <p class="foot">Toca las letras en orden. Cada error acerca a Jurásica.</p>
+  </section>
+
+  <!-- JUEGO -->
+  <section id="game" aria-label="Juego" hidden style="display:flex;flex-direction:column;gap:12px">
+    <div class="topbar">
+      <button class="iconbtn" id="btn-exit" type="button" aria-label="Volver al inicio">←</button>
+      <div class="hearts" id="hearts" aria-label="Vidas"></div>
+      <div class="progress">
+        <small><span id="lvl-txt">Palabra 1/8</span><span id="mode-txt">Peques</span></small>
+        <div class="bar"><i id="lvl-bar"></i></div>
+      </div>
+      <div class="score" id="score" aria-label="Puntos">0</div>
+    </div>
+
+    <div class="scene" id="scene">
+      <div class="speech" id="speech" role="status"></div>
+    </div>
+    <div class="threat" aria-hidden="true"><i id="threat"></i></div>
+
+    <div class="clue" id="clue">
+      <div class="big" id="clue-big" aria-hidden="true">🐱</div>
+      <div class="txt">
+        <div class="cat" id="clue-cat">Animales</div>
+        <div class="def" id="clue-def"></div>
+      </div>
+    </div>
+
+    <div class="slots" id="slots" aria-label="Palabra a formar"></div>
+    <div class="tiles" id="tiles" aria-label="Letras disponibles"></div>
+    <div class="tools">
+      <button class="btn ghost" id="btn-hint" type="button">💡 Pista <span id="hint-n">2</span></button>
+      <button class="btn ghost" id="btn-skip" type="button">🔀 Mezclar</button>
+    </div>
+  </section>
+
+</div>
+
+<div class="modal" id="modal" hidden>
+  <div class="card" id="card" role="dialog" aria-modal="true" aria-labelledby="card-title"></div>
+</div>
+<canvas id="confetti" aria-hidden="true"></canvas>
+<div class="live" id="live" aria-live="polite"></div>
+<script>
+/* ===== ARTE: escena y personajes (SVG original, sin imágenes externas) ===== */
+
+/** Escena nocturna. `uid` evita ids repetidos entre las dos instancias. */
+function sceneSVG(uid){
+  const stars=[[24,18,1.4],[60,40,1],[96,14,1.2],[140,32,1],[178,12,1.5],[214,36,1],[250,16,1.2],[286,44,1],[372,18,1.3],[16,60,1],[120,64,1.1],[230,60,1]]
+    .map(([x,y,r])=>`<circle cx="${x}" cy="${y}" r="${r}" fill="#fff" opacity=".8"/>`).join('');
+  const tree=(x,s)=>`<g transform="translate(${x} 150) scale(${s})"><rect x="-3" y="-4" width="6" height="14" fill="#4a3426"/><path d="M0-52 L16-18 H6 L20 6 H-20 L-6-18 H-16Z" fill="#0f4a3c"/><path d="M0-52 L16-18 H6 L-2-34Z" fill="#17614e"/></g>`;
+  return `<svg class="scene-bg" viewBox="0 0 400 200" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+  <defs>
+    <linearGradient id="sky${uid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#081a28"/><stop offset=".7" stop-color="#1a5068"/><stop offset="1" stop-color="#2b7a85"/></linearGradient>
+    <radialGradient id="glow${uid}"><stop offset="0" stop-color="#ffe9a6" stop-opacity=".9"/><stop offset="1" stop-color="#ffe9a6" stop-opacity="0"/></radialGradient>
+    <radialGradient id="win${uid}"><stop offset="0" stop-color="#ffd24d"/><stop offset="1" stop-color="#ff9b2e"/></radialGradient>
+  </defs>
+  <rect width="400" height="200" fill="url(#sky${uid})"/>
+  ${stars}
+  <circle cx="330" cy="46" r="48" fill="url(#glow${uid})"/>
+  <circle cx="330" cy="46" r="21" fill="#fff4c9"/>
+  <circle cx="338" cy="40" r="19" fill="#1a5068" opacity=".0"/>
+  <path d="M0 128 C50 96 100 120 150 104 C210 86 260 118 310 100 C350 88 380 104 400 98 V200 H0Z" fill="#124058"/>
+  <path d="M0 146 C60 126 120 142 190 130 C250 120 320 140 400 126 V200 H0Z" fill="#14503f"/>
+  ${tree(22,1.1)}${tree(58,.8)}${tree(150,.7)}
+  <path d="M0 168 C80 156 200 160 400 154 V200 H0Z" fill="#1d6a4c"/>
+  <path d="M0 184 C100 172 240 178 400 170 V200 H0Z" fill="#c9a36a" opacity=".55"/>
+  <g class="cabin">
+    <ellipse cx="346" cy="170" rx="50" ry="6" fill="#0a2a22" opacity=".5"/>
+    <rect x="308" y="112" width="76" height="56" rx="3" fill="#8a5a3c"/>
+    <path d="M308 114 L346 80 L384 114Z" fill="#c2453a"/>
+    <path d="M308 114 L346 80 L346 88 L318 114Z" fill="#a73528"/>
+    <rect x="338" y="134" width="20" height="34" rx="3" fill="#4a2f1e"/>
+    <circle cx="353" cy="152" r="1.6" fill="#ffd24d"/>
+    <rect x="314" y="126" width="18" height="16" rx="2" fill="url(#win${uid})"/>
+    <path d="M323 126 V142 M314 134 H332" stroke="#8a5a3c" stroke-width="1.4"/>
+    <rect x="364" y="126" width="14" height="14" rx="2" fill="url(#win${uid})"/>
+    <rect x="364" y="94" width="9" height="16" fill="#6b4630"/>
+  </g>
+  <g fill="#ffd24d" opacity=".9"><circle cx="90" cy="176" r="2"/><circle cx="205" cy="182" r="2"/><circle cx="262" cy="174" r="1.6"/></g>
+  <g fill="#ff8aa5"><circle cx="40" cy="186" r="2"/><circle cx="170" cy="190" r="2"/></g>
+</svg>`;
+}
+
+/** Emi: niño de pelo corto oscuro y camiseta gris. Mira hacia la derecha. */
+function emiSVG(){
+  return `<svg viewBox="0 0 100 142" role="img" aria-label="Emi">
+  <ellipse cx="50" cy="139" rx="26" ry="3.5" fill="#000" opacity=".28"/>
+  <rect x="35" y="106" width="11" height="26" rx="5.5" fill="#e2a77f"/>
+  <rect x="54" y="106" width="11" height="26" rx="5.5" fill="#e2a77f"/>
+  <path d="M30 135 q0-7 8-7 h9 q3 0 3 7 q0 4-4 4 h-12 q-4 0-4-4z" fill="#fff"/>
+  <path d="M50 135 q0-7 8-7 h9 q3 0 3 7 q0 4-4 4 h-12 q-4 0-4-4z" fill="#fff"/>
+  <path d="M33 134 h14 M53 134 h14" stroke="#4fd6a0" stroke-width="2.2" stroke-linecap="round"/>
+  <path d="M30 94 h40 l3 22 h-20 l-3-9 -3 9 h-20z" fill="#6f6f66"/>
+  <path d="M28 66 q0-9 10-10 h24 q10 1 10 10 v32 q0 5-5 5 h-34 q-5 0-5-5z" fill="#8a8a80"/>
+  <path d="M32 72h36M32 80h36M32 88h36M32 96h36" stroke="#70706a" stroke-width="2" stroke-dasharray="2 3"/>
+  <path d="M41 57 q9 9 18 0" stroke="#6a6a62" stroke-width="3.2" fill="none" stroke-linecap="round"/>
+  <rect x="15" y="68" width="12" height="26" rx="6" fill="#e2a77f" transform="rotate(10 21 68)"/>
+  <rect x="73" y="68" width="12" height="26" rx="6" fill="#e2a77f" transform="rotate(-10 79 68)"/>
+  <path d="M25 62 q-8 3-8 14 h13 q0-9-1-14z" fill="#8a8a80"/>
+  <path d="M75 62 q8 3 8 14 h-13 q0-9 1-14z" fill="#8a8a80"/>
+  <circle cx="26" cy="38" r="5.5" fill="#e2a77f"/><circle cx="74" cy="38" r="5.5" fill="#e2a77f"/>
+  <circle cx="26" cy="38" r="2.4" fill="#c98863"/><circle cx="74" cy="38" r="2.4" fill="#c98863"/>
+  <circle cx="50" cy="36" r="24" fill="#e8b08a"/>
+  <path d="M25 35 C21 11 38 5 52 5 C68 5 79 16 75 35 C72 26 66 21 50 21 C36 21 29 26 25 35Z" fill="#1b1311"/>
+  <path d="M25 35 C24 40 25 44 27 46 C26 40 27 37 28 35Z M75 35 C76 40 75 44 73 46 C74 40 73 37 72 35Z" fill="#1b1311"/>
+  <ellipse cx="41" cy="38" rx="3.8" ry="4.8" fill="#1b1311"/><ellipse cx="59" cy="38" rx="3.8" ry="4.8" fill="#1b1311"/>
+  <circle cx="42.4" cy="36.2" r="1.4" fill="#fff"/><circle cx="60.4" cy="36.2" r="1.4" fill="#fff"/>
+  <ellipse cx="35" cy="46" rx="4.2" ry="2.6" fill="#f08a6a" opacity=".5"/><ellipse cx="65" cy="46" rx="4.2" ry="2.6" fill="#f08a6a" opacity=".5"/>
+  <g class="face-happy">
+    <path d="M35 29 q6-4 12 0 M53 29 q6-4 12 0" stroke="#1b1311" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+    <path d="M40 47 Q50 58 60 47Z" fill="#6a1f26"/><path d="M42 47.4 Q50 51 58 47.4Z" fill="#fff"/>
+  </g>
+  <g class="face-scared">
+    <path d="M35 31 L46 26 M65 31 L54 26" stroke="#1b1311" stroke-width="2.2" stroke-linecap="round"/>
+    <ellipse cx="50" cy="52" rx="4.2" ry="5.2" fill="#6a1f26"/>
+    <path d="M78 20 q3 5 0 8 q-3-3 0-8z" fill="#6ccfff"/>
+  </g>
+  <g class="face-angry">
+    <path d="M36 27 L46 31 M64 27 L54 31" stroke="#1b1311" stroke-width="2.4" stroke-linecap="round"/>
+    <path d="M43 51 Q50 47 57 51" stroke="#6a1f26" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+  </g>
+  <g class="face-win">
+    <path d="M35 29 q6-5 12 0 M53 29 q6-5 12 0" stroke="#1b1311" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+    <path d="M37 46 Q50 64 63 46Z" fill="#6a1f26"/><path d="M39 46.4 Q50 52 61 46.4Z" fill="#fff"/><path d="M44 56 Q50 52 56 56 Q50 61 44 56Z" fill="#ff7d86"/>
+  </g>
+</svg>`;
+}
+
+/** Jurásica: villana juguetona de pelo largo ondulado, sombrero vino con cresta de dinosaurio y pantalón de vaca. */
+function juraSVG(){
+  const blob=(x,y,rx,ry,r=0)=>`<ellipse cx="${x}" cy="${y}" rx="${rx}" ry="${ry}" transform="rotate(${r} ${x} ${y})" fill="#1c1c1c"/>`;
+  return `<svg viewBox="0 -16 100 178" role="img" aria-label="Jurásica">
+  <ellipse cx="50" cy="157" rx="28" ry="3.6" fill="#000" opacity=".28"/>
+  <path d="M34 112 C16 112 6 124 0 140 C10 132 22 130 36 128Z" fill="#3fbf8a"/>
+  <path d="M10 124 l-2-9 l6 5z M20 119 l-1-9 l6 6z" fill="#2c9a6e"/>
+  <path d="M25 40 C13 72 16 104 29 118 L71 118 C84 104 87 72 75 40Z" fill="#1d1411"/>
+  <path d="M30 60 C26 80 28 98 34 110" stroke="#33231b" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <path d="M70 60 C74 80 72 98 66 110" stroke="#33231b" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <rect x="33" y="98" width="15" height="52" rx="6" fill="#fdfdf8"/><rect x="52" y="98" width="15" height="52" rx="6" fill="#fdfdf8"/>
+  ${blob(39,112,5,4,-20)}${blob(44,130,3.6,5,15)}${blob(38,141,3.2,2.6)}
+  ${blob(58,108,4,3.4,10)}${blob(62,124,4.6,3.6,-25)}${blob(57,140,3.4,3)}
+  <path d="M29 147 q0-7 9-7 h9 q3 0 3 7 q0 5-5 5 h-12 q-4 0-4-5z" fill="#fff" stroke="#cfd6d6" stroke-width="1"/>
+  <path d="M50 147 q0-7 9-7 h9 q3 0 3 7 q0 5-5 5 h-12 q-4 0-4-5z" fill="#fff" stroke="#cfd6d6" stroke-width="1"/>
+  <rect x="32" y="94" width="36" height="9" rx="2" fill="#2f4a6b"/><rect x="46" y="94.8" width="8" height="7.4" rx="1.4" fill="#c9d3da"/>
+  <rect x="35" y="86" width="30" height="10" fill="#d99b72"/>
+  <path d="M30 64 q0-9 9-10 h22 q9 1 9 10 v25 q-19 5-40 0z" fill="#ffb62e"/>
+  <path d="M33 74 q17 6 34 0" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <rect x="17" y="64" width="13" height="30" rx="6.5" fill="#d99b72" transform="rotate(9 23 64)"/>
+  <rect x="70" y="64" width="13" height="30" rx="6.5" fill="#d99b72" transform="rotate(-9 77 64)"/>
+  <path d="M27 60 q-9 3-9 16 h14 q0-10-1-16z" fill="#ffb62e"/><path d="M73 60 q9 3 9 16 h-14 q0-10 1-16z" fill="#ffb62e"/>
+  <rect x="44" y="52" width="12" height="12" rx="4" fill="#d99b72"/>
+  <circle cx="50" cy="38" r="22" fill="#e1a37a"/>
+  <path d="M28 36 C27 18 39 12 52 12 C65 12 73 20 72 36 C67 27 59 24 50 26 C41 24 33 28 28 36Z" fill="#1d1411"/>
+  <ellipse cx="42" cy="40" rx="3.6" ry="4.4" fill="#1d1411"/><ellipse cx="58" cy="40" rx="3.6" ry="4.4" fill="#1d1411"/>
+  <circle cx="43.2" cy="38.4" r="1.3" fill="#fff"/><circle cx="59.2" cy="38.4" r="1.3" fill="#fff"/>
+  <path d="M37 36.5 l-3-2 M63 36.5 l3-2" stroke="#1d1411" stroke-width="1.6" stroke-linecap="round"/>
+  <ellipse cx="36" cy="47" rx="4" ry="2.4" fill="#f08a6a" opacity=".55"/><ellipse cx="64" cy="47" rx="4" ry="2.4" fill="#f08a6a" opacity=".55"/>
+  <ellipse cx="50" cy="15" rx="36" ry="8.5" fill="#8c2f3f"/>
+  <path d="M29 15 C29 -2 38 -7 50 -7 C62 -7 71 -2 71 15Z" fill="#a73c50"/>
+  <path d="M29 12 q21 6 42 0" stroke="#5e1c28" stroke-width="3.2" fill="none"/>
+  <path d="M35 -4 l5-11 l5 9z M45 -7 l6-13 l6 13z M57 -5 l5-10 l5 12z" fill="#3fbf8a"/>
+  <g class="face-happy">
+    <path d="M36 31 q6-4 12 0 M52 31 q6-4 12 0" stroke="#1d1411" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <path d="M41 49 Q50 57 59 49 Q50 53 41 49Z" fill="#c2394d"/>
+  </g>
+  <g class="face-angry">
+    <path d="M35 29 L47 35 M65 29 L53 35" stroke="#1d1411" stroke-width="2.6" stroke-linecap="round"/>
+    <path d="M41 49 Q50 62 59 49Z" fill="#6a1f26"/><path d="M43 49.4 Q50 53 57 49.4Z" fill="#fff"/>
+  </g>
+  <g class="face-scared">
+    <path d="M36 33 L47 29 M64 33 L53 29" stroke="#1d1411" stroke-width="2" stroke-linecap="round"/>
+    <ellipse cx="50" cy="52" rx="4" ry="4.8" fill="#6a1f26"/>
+  </g>
+  <g class="face-win">
+    <path d="M36 33 L47 29 M64 33 L53 29" stroke="#1d1411" stroke-width="2" stroke-linecap="round"/>
+    <path d="M42 53 Q50 46 58 53" stroke="#c2394d" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <path d="M69 28 q3 5 0 8 q-3-3 0-8z" fill="#6ccfff"/>
+  </g>
+</svg>`;
+}
+/* ===== PALABRAS: [como se muestra, pista, categoría] ===== */
+
+/** Peques: la pista es un dibujo. */
+const KIDS_WORDS = [
+  // Animales
+  ['GATO','🐱','Animales'],['PERRO','🐶','Animales'],['VACA','🐮','Animales'],['PATO','🦆','Animales'],
+  ['LEÓN','🦁','Animales'],['OSO','🐻','Animales'],['RANA','🐸','Animales'],['PEZ','🐟','Animales'],
+  ['MONO','🐵','Animales'],['TIGRE','🐯','Animales'],['CEBRA','🦓','Animales'],['JIRAFA','🦒','Animales'],
+  ['ELEFANTE','🐘','Animales'],['TORTUGA','🐢','Animales'],['MARIPOSA','🦋','Animales'],['DELFÍN','🐬','Animales'],
+  ['BALLENA','🐳','Animales'],['PINGÜINO','🐧','Animales'],['CABALLO','🐴','Animales'],['CONEJO','🐰','Animales'],
+  ['OVEJA','🐑','Animales'],['GALLINA','🐔','Animales'],['ABEJA','🐝','Animales'],['DINOSAURIO','🦖','Animales'],
+  ['TIBURÓN','🦈','Animales'],['CARACOL','🐌','Animales'],['PULPO','🐙','Animales'],['BÚHO','🦉','Animales'],
+  // Frutas y comida
+  ['UVA','🍇','Frutas'],['PERA','🍐','Frutas'],['MANZANA','🍎','Frutas'],['BANANO','🍌','Frutas'],
+  ['FRESA','🍓','Frutas'],['SANDÍA','🍉','Frutas'],['PIÑA','🍍','Frutas'],['LIMÓN','🍋','Frutas'],
+  ['MANGO','🥭','Frutas'],['COCO','🥥','Frutas'],['PAPA','🥔','Comida'],['PIZZA','🍕','Comida'],
+  ['HELADO','🍦','Comida'],['TORTA','🎂','Comida'],['QUESO','🧀','Comida'],['HUEVO','🥚','Comida'],
+  ['GALLETA','🍪','Comida'],['ZANAHORIA','🥕','Comida'],['MAZORCA','🌽','Comida'],
+  // Cosas
+  ['SOL','☀️','Cielo'],['LUNA','🌙','Cielo'],['ESTRELLA','⭐','Cielo'],['NUBE','☁️','Cielo'],
+  ['LLUVIA','🌧️','Cielo'],['ARCOÍRIS','🌈','Cielo'],['CASA','🏠','Cosas'],['CARRO','🚗','Transporte'],
+  ['BUS','🚌','Transporte'],['TREN','🚆','Transporte'],['AVIÓN','✈️','Transporte'],['BARCO','🚢','Transporte'],
+  ['BICICLETA','🚲','Transporte'],['COHETE','🚀','Transporte'],['PELOTA','⚽','Juegos'],['GLOBO','🎈','Juegos'],
+  ['REGALO','🎁','Juegos'],['ROBOT','🤖','Juegos'],['PAYASO','🤡','Juegos'],['GUITARRA','🎸','Música'],
+  ['TAMBOR','🥁','Música'],['LIBRO','📚','Cosas'],['RELOJ','⏰','Cosas'],['FLOR','🌸','Naturaleza'],
+  ['ÁRBOL','🌳','Naturaleza'],['PLAYA','🏖️','Naturaleza'],['VOLCÁN','🌋','Naturaleza'],['CASTILLO','🏰','Cosas'],
+  ['TELÉFONO','📱','Cosas'],['CORAZÓN','❤️','Cosas'],['TIJERAS','✂️','Cosas'],['PARAGUAS','☂️','Cosas']
+];
+
+/** Mayores: la pista es una definición. Incluye guiños a Cali, Colombia y la Navidad. */
+const ADULT_WORDS = [
+  ['MURCIÉLAGO','Mamífero volador y nocturno. Sus cinco vocales están todas en el nombre.','Animales'],
+  ['BIBLIOTECA','Lugar donde se guardan y se prestan libros.','Lugares'],
+  ['ARQUITECTO','Profesional que diseña edificios y casas.','Oficios'],
+  ['LABERINTO','Lugar con caminos que confunden y del que cuesta salir.','Lugares'],
+  ['TELESCOPIO','Instrumento para observar astros lejanos.','Ciencia'],
+  ['COCODRILO','Reptil de río con una mandíbula muy poderosa.','Animales'],
+  ['HORIZONTE','Línea donde parecen unirse el cielo y la tierra.','Naturaleza'],
+  ['GRAVEDAD','Fuerza que nos mantiene pegados al suelo.','Ciencia'],
+  ['TERREMOTO','Movimiento brusco y fuerte de la tierra.','Naturaleza'],
+  ['ABECEDARIO','Conjunto ordenado de las letras de un idioma.','Lenguaje'],
+  ['ESTRATEGIA','Plan pensado para lograr un objetivo.','Mente'],
+  ['MEMORIA','Capacidad de recordar lo vivido.','Mente'],
+  ['HISTORIA','Relato de lo que ocurrió en el pasado.','Cultura'],
+  ['ASTRONAUTA','Persona entrenada para viajar al espacio.','Oficios'],
+  ['FOTOGRAFÍA','Imagen captada con una cámara.','Arte'],
+  ['CARNAVAL','Fiesta de disfraces, música y desfiles.','Fiestas'],
+  ['AVENTURA','Experiencia arriesgada y emocionante.','Vida'],
+  ['TESORO','Lo que buscan los piratas, escondido en un cofre.','Aventura'],
+  ['ESMERALDA','Piedra verde por la que Colombia es famosa.','Colombia'],
+  ['SANCOCHO','Sopa colombiana con plátano, yuca y carne.','Colombia'],
+  ['AJIACO','Sopa bogotana con tres clases de papa.','Colombia'],
+  ['BUÑUELO','Fritura redonda y dorada típica de diciembre.','Navidad'],
+  ['NOVENA','Oración de nueve días que se reza antes de Navidad.','Navidad'],
+  ['PESEBRE','Escena del nacimiento de Jesús que se arma en Navidad.','Navidad'],
+  ['PANDEBONO','Pan de queso y almidón de yuca, muy popular en el Valle.','Cali'],
+  ['LULADA','Bebida fría de lulo, limón y hielo, típica de Cali.','Cali'],
+  ['CHAMPÚS','Bebida vallecaucana con maíz, lulo, piña y panela.','Cali'],
+  ['SALSA','Ritmo con el que Cali se hizo famosa en el mundo.','Cali'],
+  ['FÚTBOL','Deporte de balón que une a medio planeta.','Deportes'],
+  ['PROGRAMADOR','Persona que escribe código para crear aplicaciones.','Oficios'],
+  ['ALGORITMO','Serie de pasos para resolver un problema.','Tecnología'],
+  ['ASTEROIDE','Roca que vaga por el espacio.','Ciencia'],
+  ['DINOSAURIO','Reptil gigante que reinó en el período Jurásico.','Jurásica'],
+  ['MARIPOSA','Insecto de alas de colores que antes fue oruga.','Animales'],
+  ['ECLIPSE','Cuando la Luna tapa al Sol o la Tierra tapa a la Luna.','Ciencia'],
+  ['RELÁMPAGO','Destello de luz que aparece antes del trueno.','Naturaleza'],
+  ['COMPAÑERO','Persona con quien compartes estudio, trabajo o juego.','Vida'],
+  ['CHOCOLATE','Dulce hecho con cacao, favorito de grandes y chicos.','Comida'],
+  ['CAMPEONATO','Competencia en la que se disputa un título.','Deportes'],
+  ['CUMPLEAÑOS','Día en que celebras que naciste.','Fiestas']
+];
+/* ===== JUEGO: Encuentra a Emi ===== */
+(function(){
+'use strict';
+
+const $ = s => document.querySelector(s);
+const rnd = a => a[Math.floor(Math.random()*a.length)];
+const reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+/** Quita tildes y diéresis, conserva la Ñ. */
+const norm = s => s.replace(/Ñ/g,'\u0001').normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/\u0001/g,'Ñ');
+
+const MODES = {
+  kids:   {key:'kids',   label:'Peques',  words:KIDS_WORDS,  rounds:8,  maxMiss:4, hearts:3, hints:2, decoys:2, timed:false},
+  adults: {key:'adults', label:'Mayores', words:ADULT_WORDS, rounds:10, maxMiss:3, hearts:3, hints:2, decoys:4, timed:true}
+};
+const CHEERS = ['¡Sí!','¡Voy bien!','¡Casi llego!','¡Eso!','¡Corre, corre!'];
+const TAUNTS = ['¡Te alcanzo!','¡Jejeje!','¡Rawr!','¡No escapas!','¡Ya casi!'];
+const ALPHABET = 'ABCDEFGHIJLMNOPQRSTUVXYZ';
+
+/* ---------- Guardado local (opcional, nunca bloquea el juego) ---------- */
+const store = {
+  get(){ try{ return JSON.parse(localStorage.getItem('emi-v1')) || {}; }catch(e){ return {}; } },
+  set(o){ try{ localStorage.setItem('emi-v1', JSON.stringify(o)); }catch(e){} }
+};
+const save = Object.assign({best:{}, stars:0, streak:0, last:'', mode:'kids', sound:true, voice:true}, store.get());
+save.best = Object.assign({kids:0, adults:0}, save.best);
+if(!MODES[save.mode]) save.mode = 'kids';
+const persist = () => store.set(save);
+
+/* ---------- Sonido y voz ---------- */
+let ac = null;
+function tone(f, d=.12, type='sine', t0=0, vol=.07){
+  if(!save.sound) return;
+  try{
+    ac = ac || new (window.AudioContext || window.webkitAudioContext)();
+    if(ac.state === 'suspended') ac.resume();
+    const o = ac.createOscillator(), g = ac.createGain(), t = ac.currentTime + t0;
+    o.type = type; o.frequency.value = f;
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.linearRampToValueAtTime(vol, t + .015);
+    g.gain.exponentialRampToValueAtTime(.0001, t + d);
+    o.connect(g); g.connect(ac.destination); o.start(t); o.stop(t + d + .03);
+  }catch(e){}
+}
+const sfx = {
+  ok:   () => { tone(660,.09,'triangle'); tone(880,.12,'triangle',.07); },
+  bad:  () => tone(170,.24,'sawtooth',0,.05),
+  hint: () => { tone(988,.1,'sine'); tone(1319,.14,'sine',.08); },
+  win:  () => [523,659,784,1047].forEach((f,i) => tone(f,.2,'triangle',i*.1)),
+  lose: () => [392,330,262,196].forEach((f,i) => tone(f,.26,'sawtooth',i*.15,.045))
+};
+function say(text){
+  if(!save.voice || !('speechSynthesis' in window)) return;
+  try{
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text.toLowerCase());
+    u.lang = 'es-CO'; u.rate = .9; u.pitch = 1.15;
+    speechSynthesis.speak(u);
+  }catch(e){}
+}
+function announce(t){ $('#live').textContent = t; }
+
+/* ---------- Confeti ---------- */
+let confettiRaf = 0;
+function confetti(count=140){
+  if(reduce) return;
+  const c = $('#confetti'), x = c.getContext('2d');
+  c.width = innerWidth; c.height = innerHeight;
+  const colors = ['#ffc83d','#4fd6a0','#6ccfff','#ff6b5a','#ffffff','#ff8aa5'];
+  const ps = Array.from({length:count}, () => ({
+    x: innerWidth/2 + (Math.random()-.5)*120, y: innerHeight*.35,
+    vx: (Math.random()-.5)*11, vy: -Math.random()*12 - 3,
+    s: 5 + Math.random()*7, r: Math.random()*6, vr: (Math.random()-.5)*.4,
+    c: rnd(colors), life: 0
+  }));
+  cancelAnimationFrame(confettiRaf);
+  (function frame(){
+    x.clearRect(0,0,c.width,c.height);
+    let alive = 0;
+    ps.forEach(p => {
+      p.life++; p.vy += .3; p.vx *= .99; p.x += p.vx; p.y += p.vy; p.r += p.vr;
+      if(p.y < c.height + 20 && p.life < 170){
+        alive++; x.save(); x.translate(p.x,p.y); x.rotate(p.r); x.fillStyle = p.c;
+        x.fillRect(-p.s/2, -p.s/3, p.s, p.s*.66); x.restore();
+      }
+    });
+    if(alive) confettiRaf = requestAnimationFrame(frame); else x.clearRect(0,0,c.width,c.height);
+  })();
+}
+
+/* ---------- Estado ---------- */
+let G = null;           // partida en curso
+let inGame = false;
+let timer = null, lastTick = 0, speechTimer = 0, lastFocus = null;
+
+const emi  = () => $('#emi');
+const jura = () => $('#jura');
+const setMood = (el, m) => { if(el) el.dataset.mood = m; };
+
+/* ---------- Pantallas ---------- */
+function actorsHTML(emiLeft, juraLeft){
+  return `<div class="actor jura run" id="jura" data-mood="happy" style="left:${juraLeft}%;width:21%">${juraSVG()}</div>
+          <div class="actor emi run" id="emi" data-mood="happy" style="left:${emiLeft}%;width:17%">${emiSVG()}</div>`;
+}
+function initScenes(){
+  $('#duo').innerHTML = sceneSVG('h') + `<div class="actor jura run" data-mood="angry" style="left:16%;width:21%">${juraSVG()}</div>
+    <div class="actor emi run" data-mood="happy" style="left:56%;width:17%">${emiSVG()}</div>`;
+  $('#scene').insertAdjacentHTML('afterbegin', sceneSVG('g') + actorsHTML(32,2));
+}
+function refreshHome(){
+  const m = save.mode;
+  $('#mode-kids').setAttribute('aria-pressed', m === 'kids');
+  $('#mode-adults').setAttribute('aria-pressed', m === 'adults');
+  $('#st-best').textContent = save.best[m] || 0;
+  $('#st-stars').textContent = save.stars || 0;
+  $('#st-streak').textContent = save.streak || 0;
+  $('#tg-sound').setAttribute('aria-pressed', save.sound);
+  $('#tg-sound').textContent = (save.sound ? '🔊' : '🔇') + ' Sonido';
+  $('#tg-voice').setAttribute('aria-pressed', save.voice);
+  $('#tg-voice').textContent = (save.voice ? '🗣️' : '🤐') + ' Voz';
+}
+function showHome(){
+  stopTimer(); inGame = false; G = null;
+  try{ speechSynthesis.cancel(); }catch(e){}
+  $('#game').hidden = true; $('#home').hidden = false;
+  refreshHome(); window.scrollTo(0,0);
+}
+function showGame(){ $('#home').hidden = true; $('#game').hidden = false; inGame = true; window.scrollTo(0,0); }
+
+/* ---------- Ventanas ---------- */
+function openCard(html, buttons){
+  const card = $('#card');
+  card.innerHTML = html + '<div class="summary" id="card-btns"></div>';
+  const box = $('#card-btns');
+  buttons.forEach(b => {
+    const el = document.createElement('button');
+    el.type = 'button'; el.className = 'btn ' + (b.cls || ''); el.textContent = b.label;
+    el.addEventListener('click', () => { closeCard(); if(b.fn) b.fn(); });
+    box.appendChild(el);
+  });
+  if(buttons.length === 1) box.style.gridTemplateColumns = '1fr';
+  lastFocus = document.activeElement;
+  $('#modal').hidden = false;
+  box.firstChild.focus();
+}
+function closeCard(){
+  $('#modal').hidden = true;
+  try{ if(lastFocus && document.contains(lastFocus)) lastFocus.focus(); }catch(e){}
+}
+const starsHTML = n => '<div class="stars" aria-label="' + n + ' de 3 estrellas">' +
+  [0,1,2].map(i => `<span class="${i < n ? '' : 'off'}">⭐</span>`).join('') + '</div>';
+const picHTML = (svg, mood) => `<div class="pic actor" data-mood="${mood}" style="position:static;width:42%;max-width:170px">${svg}</div>`;
+
+/* ---------- Partida ---------- */
+function pickWords(m){
+  const out = [], used = new Set();
+  for(let i = 0; i < m.rounds; i++){
+    const target = m.key === 'kids' ? Math.min(3 + Math.round(i*.6), 8) : Math.min(5 + Math.round(i*.65), 11);
+    let c = m.words.filter(w => !used.has(w) && Math.abs(norm(w[0]).length - target) <= 1);
+    if(!c.length){
+      c = m.words.filter(w => !used.has(w))
+        .sort((a,b) => Math.abs(norm(a[0]).length - target) - Math.abs(norm(b[0]).length - target)).slice(0,4);
+    }
+    const w = rnd(c); used.add(w); out.push(w);
+  }
+  return out;
+}
+function shuffle(a){
+  for(let i = a.length - 1; i > 0; i--){ const j = Math.floor(Math.random()*(i+1)); [a[i],a[j]] = [a[j],a[i]]; }
+  return a;
+}
+function updateStreak(){
+  const day = d => new Date(d).toLocaleDateString('en-CA');
+  const today = day(Date.now()), yesterday = day(Date.now() - 864e5);
+  if(save.last === today) return;
+  save.streak = save.last === yesterday ? (save.streak || 0) + 1 : 1;
+  save.last = today; persist();
+}
+function startRun(){
+  const m = MODES[save.mode];
+  updateStreak();
+  G = {m, mode:m.key, hearts:m.hearts, score:0, stars:0, round:0, found:0, hints:m.hints, combo:0,
+       words:pickWords(m), rw:null, locked:false};
+  showGame();
+  $('#mode-txt').textContent = m.label;
+  nextRound();
+}
+function threat(){
+  const R = G.rw; if(!R) return 0;
+  return R.miss / G.m.maxMiss + (G.m.timed ? R.elapsed / R.T : 0);
+}
+function place(){
+  const R = G.rw; if(!R) return;
+  const emiX = 32 + 40 * (R.pos / R.letters.length);
+  const t = Math.min(threat(), 1);
+  const gap = 9 - 12*t;
+  emi().style.left = emiX + '%';
+  jura().style.left = (emiX - 21 - gap) + '%';
+  $('#threat').style.width = (t*100) + '%';
+  if(!R.over){
+    const danger = t >= .66;
+    setMood(emi(), danger ? 'scared' : 'happy');
+    setMood(jura(), danger ? 'angry' : 'happy');
+  }
+}
+function renderHearts(){
+  $('#hearts').innerHTML = Array.from({length:G.m.hearts}, (_, i) =>
+    `<i class="${i < G.hearts ? '' : 'off'}" aria-hidden="true">❤️</i>`).join('');
+  $('#hearts').setAttribute('aria-label', G.hearts + ' vidas');
+}
+function renderHud(){
+  renderHearts();
+  $('#score').textContent = G.score;
+  $('#lvl-txt').textContent = 'Palabra ' + Math.min(G.round + 1, G.m.rounds) + '/' + G.m.rounds;
+  $('#lvl-bar').style.width = (G.round / G.m.rounds * 100) + '%';
+  $('#hint-n').textContent = G.hints;
+  $('#btn-hint').disabled = G.hints <= 0;
+  $('#btn-hint').style.opacity = G.hints <= 0 ? .45 : 1;
+}
+function nextRound(){
+  if(G.round >= G.m.rounds) return endRun(true);
+  const [disp, clue, cat] = G.words[G.round];
+  const key = norm(disp), letters = [...key];
+  const spare = [...ALPHABET].filter(c => !letters.includes(c));
+  const decoys = shuffle(spare).slice(0, G.m.decoys);
+  let tiles;
+  do { tiles = shuffle(letters.concat(decoys).map(ch => ({ch, used:false}))); }
+  while(tiles.length > 2 && tiles.map(t => t.ch).join('') === key);
+  G.rw = {disp, key, letters, clue, cat, pos:0, miss:0, hinted:0, over:false, elapsed:0, T:22 + 5*letters.length, tiles};
+  G.locked = false;
+
+  emi().classList.remove('hide'); emi().classList.add('run'); jura().classList.add('run');
+  $('#clue-cat').textContent = cat;
+  if(G.m.key === 'kids'){
+    $('#clue-big').textContent = clue;
+    $('#clue-def').textContent = '¿Qué es? (' + letters.length + ' letras)';
+  }else{
+    $('#clue-big').textContent = '🔎';
+    $('#clue-def').textContent = clue + ' (' + letters.length + ' letras)';
+  }
+  $('#slots').innerHTML = letters.map(() => '<div class="slot"></div>').join('');
+  $('#tiles').innerHTML = tiles.map((t, i) =>
+    `<button class="tile" type="button" data-i="${i}" aria-label="Letra ${t.ch}">${t.ch}</button>`).join('');
+  markNext(); renderHud(); place(); startTimer();
+  announce('Palabra ' + (G.round + 1) + ' de ' + G.m.rounds + '. ' + $('#clue-def').textContent);
+}
+function markNext(){
+  const R = G.rw; if(!R) return;
+  [...$('#slots').children].forEach((s, i) => s.classList.toggle('next', i === R.pos && !R.over));
+}
+function speak(who, text){
+  const el = $('#speech'), a = who === 'emi' ? emi() : jura();
+  el.textContent = text;
+  el.style.left = Math.max(2, Math.min(52, parseFloat(a.style.left) || 10)) + '%';
+  el.classList.add('show');
+  clearTimeout(speechTimer); speechTimer = setTimeout(() => el.classList.remove('show'), 950);
+}
+function fillSlot(i, ch, cls){
+  const s = $('#slots').children[i];
+  s.textContent = ch; s.classList.add('on'); if(cls) s.classList.add(cls);
+}
+
+function press(i){
+  if(!G || !G.rw || G.rw.over || G.locked) return;
+  const R = G.rw, t = R.tiles[i];
+  if(!t || t.used) return;
+  const el = $('#tiles').children[i];
+  if(t.ch === R.letters[R.pos]){
+    t.used = true; el.classList.add('used');
+    fillSlot(R.pos, t.ch); R.pos++; G.score += 10;
+    sfx.ok(); markNext(); place(); renderHud();
+    if(Math.random() < .35) speak('emi', rnd(CHEERS));
+    announce('Correcto. Faltan ' + (R.letters.length - R.pos) + ' letras.');
+    if(R.pos === R.letters.length) win();
+  }else{
+    R.miss++; sfx.bad();
+    el.classList.add('bad'); setTimeout(() => el.classList.remove('bad'), 380);
+    if(navigator.vibrate) try{ navigator.vibrate(60); }catch(e){}
+    speak('jura', rnd(TAUNTS)); place();
+    announce('Esa no es. Jurásica se acerca.');
+    if(threat() >= 1) lose();
+  }
+}
+function hint(){
+  if(!G || !G.rw || G.rw.over || G.locked || G.hints <= 0) return;
+  const R = G.rw, need = R.letters[R.pos];
+  const i = R.tiles.findIndex(t => !t.used && t.ch === need);
+  if(i < 0) return;
+  R.tiles[i].used = true; $('#tiles').children[i].classList.add('used');
+  fillSlot(R.pos, need, 'hint'); R.pos++; R.hinted++; G.hints--; G.combo = 0;
+  sfx.hint(); markNext(); place(); renderHud();
+  if(R.pos === R.letters.length) win();
+}
+function reshuffle(){
+  if(!G || !G.rw || G.rw.over || G.locked) return;
+  const R = G.rw; shuffle(R.tiles);
+  $('#tiles').innerHTML = R.tiles.map((t, i) =>
+    `<button class="tile${t.used ? ' used' : ''}" type="button" data-i="${i}" aria-label="Letra ${t.ch}">${t.ch}</button>`).join('');
+}
+
+/* ---------- Resultado de cada palabra ---------- */
+function stopTimer(){ clearInterval(timer); timer = null; }
+function startTimer(){
+  stopTimer();
+  if(!G.m.timed) return;
+  lastTick = performance.now();
+  timer = setInterval(() => {
+    const n = performance.now(), dt = Math.min(250, n - lastTick); lastTick = n;
+    const R = G && G.rw;
+    if(!R || R.over || G.locked) return;
+    R.elapsed += dt/1000; place();
+    if(threat() >= 1) lose();
+  }, 100);
+}
+function win(){
+  const R = G.rw; R.over = true; G.locked = true; stopTimer();
+  const perfect = R.miss === 0 && R.hinted === 0;
+  G.combo = perfect ? G.combo + 1 : 0;
+  const stars = perfect ? 3 : (R.miss <= 1 && R.hinted <= 1 ? 2 : 1);
+  const safety = Math.max(0, 1 - threat());
+  const pts = 100 + R.letters.length*10 + Math.round(safety * (G.m.timed ? 100 : 50)) + (perfect ? G.combo*20 : 0);
+  G.score += pts; G.stars += stars; G.found++; G.round++;
+  [...R.disp].forEach((ch, i) => { const s = $('#slots').children[i]; if(s) s.textContent = ch; });
+  markNext();
+  emi().style.left = '76%'; setMood(emi(), 'win'); setMood(jura(), 'win');
+  jura().classList.remove('run');
+  sfx.win(); confetti(90); say(R.disp); announce('¡Palabra completa! ' + R.disp);
+  setTimeout(() => emi().classList.add('hide'), 650);
+  renderHud();
+  setTimeout(() => {
+    const last = G.round >= G.m.rounds;
+    const extra = perfect && G.combo > 1 ? '🔥 Racha perfecta ×' + G.combo : R.cat;
+    openCard(
+      picHTML(emiSVG(), 'win') +
+      `<h2 id="card-title">${rnd(['¡Muy bien!','¡Genial!','¡Lo lograste!','¡Excelente!'])}</h2>
+       <div class="word">${R.disp}</div>${starsHTML(stars)}
+       <div class="gain">+${pts} puntos</div><p class="msg">${extra}</p>`,
+      [{label: last ? 'Ver resultado' : 'Siguiente ➜', cls:'mint', fn: nextRound}]);
+  }, 1000);
+}
+function lose(){
+  const R = G.rw; if(R.over) return;
+  R.over = true; G.locked = true; stopTimer();
+  G.hearts--; G.combo = 0; G.round++;
+  const emiX = parseFloat(emi().style.left) || 40;
+  jura().style.left = (emiX - 18) + '%';
+  setMood(jura(), 'angry'); setMood(emi(), 'scared');
+  emi().classList.remove('run'); jura().classList.remove('run');
+  sfx.lose(); say(R.disp); announce('Jurásica atrapó a Emi. La palabra era ' + R.disp);
+  renderHud();
+  setTimeout(() => {
+    const out = G.hearts <= 0;
+    openCard(
+      picHTML(juraSVG(), 'angry') +
+      `<h2 id="card-title">¡Jurásica lo atrapó!</h2>
+       <div class="word">${R.disp}</div>
+       <p class="msg">${out ? 'Se acabaron las vidas.' : 'Pierdes una vida. Emi todavía puede escapar.'}</p>`,
+      [{label: out ? 'Ver resultado' : 'Seguir ➜', fn: () => out ? endRun(false) : nextRound()}]);
+  }, 900);
+}
+function endRun(won){
+  stopTimer();
+  const m = G.mode, isBest = G.score > (save.best[m] || 0);
+  if(isBest) save.best[m] = G.score;
+  save.stars = (save.stars || 0) + G.stars; persist();
+  if(won){ sfx.win(); confetti(200); say('Encontraste a Emi'); }
+  openCard(
+    picHTML(won ? emiSVG() : juraSVG(), won ? 'win' : 'happy') +
+    `<h2 id="card-title">${won ? '¡Encontraste a Emi!' : 'Jurásica ganó esta vez'}</h2>
+     <p class="msg">Encontraste ${G.found} de ${G.m.rounds} palabras.</p>
+     <div class="word">${G.score} pts</div>${starsHTML(G.found ? Math.max(1, Math.round(G.stars / G.m.rounds)) : 0)}
+     <p class="msg">${isBest ? '🏆 ¡Nuevo récord!' : 'Tu récord: ' + save.best[m] + ' pts'} · ⭐ ${G.stars} ganadas</p>`,
+    [{label:'Jugar otra vez', cls:'mint', fn: startRun}, {label:'Inicio', cls:'ghost', fn: showHome}]);
+  G.locked = true;
+}
+function askExit(){
+  if(!G || !G.rw) return showHome();
+  G.locked = true;
+  openCard(`<h2 id="card-title">¿Salir de la partida?</h2><p class="msg">Perderás los puntos de esta partida.</p>`,
+    [{label:'Seguir jugando', cls:'mint', fn: () => { if(G && G.rw && !G.rw.over) G.locked = false; }},
+     {label:'Salir', cls:'ghost', fn: showHome}]);
+}
+
+/* ---------- Eventos ---------- */
+$('#mode-kids').addEventListener('click', () => { save.mode = 'kids'; persist(); refreshHome(); });
+$('#mode-adults').addEventListener('click', () => { save.mode = 'adults'; persist(); refreshHome(); });
+$('#tg-sound').addEventListener('click', () => { save.sound = !save.sound; persist(); refreshHome(); if(save.sound) sfx.ok(); });
+$('#tg-voice').addEventListener('click', () => { save.voice = !save.voice; persist(); refreshHome(); });
+$('#play').addEventListener('click', startRun);
+$('#btn-exit').addEventListener('click', askExit);
+$('#btn-hint').addEventListener('click', hint);
+$('#btn-skip').addEventListener('click', reshuffle);
+$('#tiles').addEventListener('click', e => {
+  const b = e.target.closest('.tile'); if(b) press(+b.dataset.i);
+});
+document.addEventListener('keydown', e => {
+  if(!inGame || !G || !G.rw || G.rw.over || G.locked || !$('#modal').hidden) return;
+  if(e.ctrlKey || e.metaKey || e.altKey || e.key.length !== 1) return;
+  const ch = norm(e.key.toUpperCase());
+  const i = G.rw.tiles.findIndex(t => !t.used && t.ch === ch);
+  if(i >= 0){ e.preventDefault(); press(i); }
+});
+
+initScenes();
+refreshHome();
+})();
+</script>
+<script>if('serviceWorker' in navigator && location.protocol.startsWith('http')){addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}</script>
+</body></html>
